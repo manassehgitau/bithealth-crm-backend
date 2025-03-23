@@ -9,6 +9,18 @@ const eventSchema = new mongoose.Schema(
         description: { 
           type: String,
            default: "" 
+        },
+        eventDate: { 
+            type: String, 
+            required: true 
+        },
+        startTime: { 
+            type: String, 
+            required: true 
+        },
+        endTime: { 
+            type: String, 
+            required: true 
         }
     },
     { timestamps: true }
