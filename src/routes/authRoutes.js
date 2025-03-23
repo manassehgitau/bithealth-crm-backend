@@ -1,9 +1,14 @@
-import express from 'express'
-import { login, register } from '../controllers/authController.js'
+import express from "express";
+import { registerUser, loginUser, getMe } from "../controllers/authController.js";
+import { verifyToken, authorizeRoles } from "../middlewares/authMiddleware.js";
 
-const authRoutes = express.Router();
+const router = express.Router();
 
-authRoutes.post("/register", register);
-authRoutes.post("/login", login);
+router.post("/register", registerUser);
+router.post("/login", loginUser);
 
-export default authRoutes;
+// Protect this route with authentication and restrict access to "admin" users only
+router.get("/me", verifyToken, authorizeRoles("admin", "user"), getMe); // Allow both "admin" and "user" roles
+
+
+export default router;

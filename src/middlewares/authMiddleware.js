@@ -1,26 +1,30 @@
-import jwt from "jsonwebtoken"
+// authMiddleware.js
+import jwt from "jsonwebtoken";
+import User from "../models/userModel.js";
 
-const verifyToken = (req, res, next) => {
-    let token;
-    let authHeader = req.headers.Authorization || req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer")) {
-        token = authHeader.split(" ")[1];
+// Verify JWT Token
+const verifyToken = async (req, res, next) => {
+  const token = req.header("Authorization")?.split(" ")[1]; // Bearer token
+  if (!token) return res.status(401).json({ message: "Access denied. No token provided" });
 
-        if (!token){
-            return res.status(401).json({message: "No Token, authorization failed"});
-        }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decoded.id).select("-password");
+    if (!req.user) return res.status(404).json({ message: "User not found" });
+    next();
+  } catch (err) {
+    res.status(403).json({ message: "Invalid token" });
+  }
+};
 
-        try {
-            const decode = Jwt.verify(token, process.env.JWT_SECRET);
-            req.user = decode;
-            console.log("The decoded user is: ", req.user);
-            next();
-        } catch (error) {
-            res.status(400).json({ message: "Token is not valid!"});
-        }
-    }else {
-        res.status(400).json({ message: "Token is not available!" })
+// Role-based authorization
+const authorizeRoles = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Access denied. Insufficient permissions" });
     }
-}
+    next();
+  };
+};
 
-export default verifyToken;
+export { verifyToken, authorizeRoles };

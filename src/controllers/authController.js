@@ -1,50 +1,55 @@
 import User from "../models/userModel.js";
-import bcrypt from "bcryptjs";
-import Jwt from "jsonwebtoken";
-const jwt = Jwt;
+import jwt from "jsonwebtoken";
 
-export const register = async(req, res) => {
-    try {
-        const {username, password, role} = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
+const generateToken = (userId) => {
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
+};
 
-        const newUser = new User({username, password: hashedPassword, role});
-        await newUser.save();
-        res.status(201).json({message: `User registered with username ${username}`});
-    } catch (error) {
-        res.status(500).json({message: `Internal Server Error`});
-        
-    }
-    
-}
+// 🔹 Register User
+export const registerUser = async (req, res) => {
+  const { username, email, password, role } = req.body;
+  if (!username || !email || !password || !role) return res.status(400).json({ message: "All fields are required" });
 
-export const login = async(req, res) => {
-    try {
-        const {username, password} = req.body;
-        const user = await User.findOne({ username });
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: "User already exists" });
 
-        if (!user){
-            return res.status(404).json({message: `User with username ${username} not found`});
-        }
+    const user = new User({ username, email, password, role });
+    await user.save();
 
-        const isMatch = await bcrypt.compare(password, user.password);
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
-        if(!isMatch){
-            return res.status(400).json({message: `Invalid Credentials`});
-        }
+// 🔹 Login User
+export const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ message: "Email and password required" });
 
-        const token = jwt.sign(
-            {id: user._i, role: user.role}, process.env.JWT_SECRET, 
-            { expiresIn: "1h" }
-        );
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
-        res.status(200).json({ token });
-    } catch (err) {
-        res.status(500).json({message: `Internal Server Error`});
-        
-    }
-    
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-}
+    const token = generateToken(user._id);
+    res.json({ message: "Login successful", token, user: { id: user._id, name: user.username, email: user.email, role: user.role } });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
-// export default {login, register}
+// 🔹 Get Logged-in User (Protected)
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

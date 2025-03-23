@@ -5,16 +5,20 @@ import dbConnect from './config/dbConnect.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/UserRoutes.js';
 
+
 dotenv.config();
 const app = express();
 dbConnect();
 
 // middleware
 app.use(express.json());
+app.use(cors());
+
 
 //Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+
 
 // Start the server
 const PORT = process.env.PORT || 3000;
