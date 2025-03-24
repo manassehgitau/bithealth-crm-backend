@@ -1,4 +1,4 @@
-import Event from "../models/eventModel.js";
+import Event from "../../models/eventModel.js";
 
 // 🔹 Error Handler
 const handleError = (res, error, status = 500) => {
@@ -8,7 +8,8 @@ const handleError = (res, error, status = 500) => {
 // 🔹 Get All Events
 export const getEvents = async (req, res) => {
     try {
-        const events = await Event.find();
+        const userId = req.user._id;
+        const events = await Event.find({user: userId});
         res.json(events);
     } catch (err) {
         handleError(res, err);
@@ -19,9 +20,10 @@ export const getEvents = async (req, res) => {
 export const getEventById = async (req, res) => {
     try {
         const { id } = req.params;
-        const event = await Event.findById(id);
-        if (!event) return res.status(404).json({ message: "Event not found" });
-        res.json(Event);
+        const userId = req.user._id;
+        const event = await Event.findById({_id: id, user: userId});
+        if (!event) return res.status(404).json({ message: "Event not found  or access denied" });
+        res.json(event);
     } catch (err) {
         handleError(res, err);
     }
@@ -35,8 +37,9 @@ export const createEvent = async (req, res) => {
 
         // const [day, month, year] = eventDate.split("/"); // Split by "/"
         // eventDate = new Date(`${year}-${month}-${day}`);
+        const userId = req.user._id;
 
-        const newEvent = new Event({ title, description, eventDate, startTime, endTime });
+        const newEvent = new Event({ title, description, eventDate, startTime, endTime, user: userId });
         await newEvent.save();
         res.status(201).json(newEvent);
     } catch (err) {
@@ -49,6 +52,10 @@ export const updateEvent = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
+        const UserId = req.user._id;
+
+        const event = await Event.findOne({_id: id, user: UserId});
+        if(!event) return res.status(404).json({ message: "Event not found or access denied" });
 
         // Only allow updating specified fields
         const allowedUpdates = ["title", "description", "eventDate", "startTime", "endTime"];
@@ -59,14 +66,11 @@ export const updateEvent = async (req, res) => {
             return res.status(400).json({ message: "Invalid update fields" });
         }
 
-        const updatedEvent = await Event.findByIdAndUpdate(id, updates, {
-            new: true,
-            runValidators: true
-        });
-
-        if (!updatedEvent) return res.status(404).json({ message: "Event not found" });
-
-        res.json(updatedEvent);
+        
+        Object.assign(event, updates); // Update the event
+        await event.save();
+        
+        res.json(event);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -76,7 +80,8 @@ export const updateEvent = async (req, res) => {
 export const deleteEvent = async (req, res) => {
     try {
       const { id } = req.params;
-      const deletedEvent = await Event.findByIdAndDelete(id);
+      const UserId = req.user._id;
+      const deletedEvent = await Event.findByIdAndDelete({_id: id, user: UserId});
   
       if (!deletedEvent) return res.status(404).json({ message: "Event not found" });
       res.status(200).json({message: "Event deleted successfully.", Event: deletedEvent});

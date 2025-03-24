@@ -18,9 +18,14 @@ const employeeSchema = new mongoose.Schema({
             required: true,
         },
     }],
-    event: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Event'
+    AccountNumber: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    AccountHost: {
+        type: String,
+        required: true,
     }
 });
 

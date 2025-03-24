@@ -3,8 +3,8 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import dbConnect from './config/dbConnect.js';
 import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/UserRoutes.js';
-import eventRoutes from "./routes/eventRoutes.js";
+import eventRoutes from "./routes/Event-Routes/eventRoutes.js";
+import adminRoutes from "./routes/Admin-Routes/adminRoutes.js"
 
 
 dotenv.config();
@@ -18,8 +18,8 @@ app.use(cors());
 
 //Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/admin", adminRoutes)
 
 
 // Start the server
