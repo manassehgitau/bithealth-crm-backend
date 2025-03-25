@@ -25,11 +25,21 @@ const userSchema = new mongoose.Schema({
         type: String, 
         required: true, 
     },
+    image: {
+        type: String, 
+        required: true,
+        default: "",
+    },
     role: {
         type: String,
         required: true,
         enum: ["admin", "employee", "user"],
         default: "user"
+    },
+    status: {
+        type: String,
+        enum: ["active", "inactive"],
+        default: "active",  // Default is active when a user is created
     }
 }, {
     timestamps: true,

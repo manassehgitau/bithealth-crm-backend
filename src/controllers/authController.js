@@ -3,22 +3,22 @@ import jwt from "jsonwebtoken";
 
 // generate auth token
 const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "24h" });
 };
 
 // 🔹 Register User
 export const registerUser = async (req, res) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password, role, phone, location } = req.body;
   if (!username || !email || !password || !role) return res.status(400).json({ message: "All fields are required" });
 
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
 
-    const user = new User({ username, email, password, role });
+    const user = new User({ username, email, password, role, phone, location });
     await user.save();
 
-    res.status(201).json({ message: "User registered successfully" });
+    res.json({ message: "registration successful", user: { id: user._id, name: user.username, email: user.email, role: user.role, tel: user.phone, location: user.location, status: user.status } });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -37,7 +37,7 @@ export const loginUser = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     const token = generateToken(user._id);
-    res.json({ message: "Login successful", token, user: { id: user._id, name: user.username, email: user.email, role: user.role } });
+    res.json({ message: "Login successful", token, user: { id: user._id, name: user.username, email: user.email, role: user.role, tel: user.phone, location: user.location } });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

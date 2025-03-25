@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import User from "./userModel";
+import User from "./userModel.js";
 
 const customerSchema = new mongoose.Schema({
     analytics : [{
@@ -25,10 +25,6 @@ const customerSchema = new mongoose.Schema({
         ref: 'Product',  // Reference to the Product model
         required: true   // Ensure at least one product is linked
     }],
-    event: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Event'
-    }
 }, {
     timestamps: true,
 });
