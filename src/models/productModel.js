@@ -22,6 +22,10 @@ const productSchema = new mongoose.Schema({
     features: {
         type: [String],
         required: true,
+    }, 
+    image: {
+        type: String,
+        required: true,
     }
 }, {
     timestamps: true,

@@ -19,7 +19,7 @@ app.use(cors());
 //Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
-app.use("/api/admin", adminRoutes)
+app.use("/api/admin", adminRoutes);
 
 
 // Start the server

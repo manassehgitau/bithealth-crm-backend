@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 // generate auth token
 const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "24h" });
 };
 
 // 🔹 Register User
@@ -18,7 +18,7 @@ export const registerUser = async (req, res) => {
     const user = new User({ username, email, password, role, phone, location });
     await user.save();
 
-    res.json({ message: "registration successful", user: { id: user._id, name: user.username, email: user.email, role: user.role, tel: user.phone, location: user.location } });
+    res.json({ message: "registration successful", user: { id: user._id, name: user.username, email: user.email, role: user.role, tel: user.phone, location: user.location, status: user.status } });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

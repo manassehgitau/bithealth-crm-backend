@@ -1,3 +1,5 @@
+import Customer from '../../models/customerModel.js';
+import Employee from '../../models/employeeModel.js';
 import User from '../../models/userModel.js';
 
 // 🔹 Error Handler
@@ -12,18 +14,15 @@ export const getUserStatistics = async (req, res) => {
     const totalUsers = await User.countDocuments();
     
     // Count employees
-    const totalEmployees = await User.countDocuments({ role: "employee" });
+    const totalEmployees = await Employee.countDocuments();
     
     // Count regular users (role = user)
-    const totalRegularUsers = await User.countDocuments({ role: "user" });
-
-    // const totalProducts = await Product.countDocuments();
+    const totalCustomers = await Customer.countDocuments({ role: "user" });
 
     res.status(200).json({
       totalUsers,
       totalEmployees,
-      totalRegularUsers,
-      // totalProducts
+      totalCustomers,
     });
 
   } catch (err) {
@@ -45,21 +44,33 @@ export const getAllUsers = async (req, res) => {
 
 // create new user
 export const createNewUser = async(req, res) => {
-  const { username, email, password, role, phone, location } = req.body;
-  if (!username || !email || !password || !role) return res.status(400).json({ message: "All fields are required" });
+  const { username, email, password, role, phone, location, image } = req.body;
+  if (!username || !email || !password) return res.status(400).json({ message: "All fields are required" });
 
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
 
-    const user = new User({ username, email, password, role, phone, location });
+    const user = new User({ username, email, password, role, phone, location, image });
     await user.save();
 
-    res.json({ message: "registration successful", user: { id: user._id, name: user.username, email: user.email, role: user.role, tel: user.phone, location: user.location } });
+    res.json({ message: "registration successful", user: { id: user._id, name: user.username, email: user.email, role: user.role, tel: user.phone, location: user.location, image: user.image } });
 
   } catch (err) {
     handleError(res, err);
   }
+};
+
+// 🔹 Get user by ID
+export const getUserById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findById({_id: id});
+        if (!user) return res.status(404).json({ message: "User not found  or access denied" });
+        res.json(user);
+    } catch (err) {
+        handleError(res, err);
+    }
 };
 
 //  update User 
@@ -98,7 +109,7 @@ export const deleteUser = async (req, res) => {
     const deletedUser = await User.findByIdAndDelete(id);
 
     if (!deletedUser) return res.status(404).json({ message: "User not found" });
-    res.status(200).json({message: "User deleted successfully.", User: deletedEvent});
+    res.status(200).json({message: "User deleted successfully.", User: deletedUser});
   
   } catch (error) {
     
