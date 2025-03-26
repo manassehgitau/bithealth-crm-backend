@@ -4,6 +4,7 @@ import { getAllProducts, createNewProduct, updateProduct, deleteProduct, getProd
 import { verifyToken, authorizeRoles } from "../../middlewares/authMiddleware.js";
 import { assignDuty, assignSalesLeadToEmployee, createEmployee, createSalesLead, deleteEmployeeById, getAllEmployees, getEmployeeById, updateEmployee, viewEmployeeDuties, getAllSalesLeads, addActionToLead, getEmployeeLeads } from "../../controllers/Admin-Functions/adminEmployeeController.js";
 import { createCustomer, deleteCustomerById, getAllCustomers, getCustomerById, updateCustomerById } from "../../controllers/Admin-Functions/adminCustomerController.js";
+import { uploadImage } from "../../controllers/uploadImages.js";
 
 const adminRouter = express.Router();
 
@@ -31,7 +32,7 @@ adminRouter.delete('/customers/:id', deleteCustomerById);
 adminRouter.patch('/customers/activate/:id', verifyToken, authorizeRoles("admin"), activateAccount);
 
 // Deactivate account (only admins)
-adminRouter.patch('/customers/deactivate/:id',  verifyToken, authorizeRoles("admin"), deactivateAccount);
+adminRouter.patch('/customers/deactivate/:id', verifyToken, authorizeRoles("admin"), deactivateAccount);
 
 
 // Admin Products CRUD Operations
@@ -63,4 +64,21 @@ adminRouter.get('/allLeads', verifyToken, authorizeRoles("admin"), getAllSalesLe
 adminRouter.put('/employee/assign-lead', verifyToken, authorizeRoles("admin"), assignSalesLeadToEmployee);
 adminRouter.put('/employee/add-action', verifyToken, authorizeRoles("admin"), addActionToLead);
 
+
+// Upload images
+adminRouter.post('/uploadImage', async (req, res) => {
+    const { image } = req.body; // Assuming the image is being sent in base64 format in the request body
+
+    if (!image) {
+        return res.status(400).json({ error: "Image data is required" });
+    }
+
+    try {
+        const imageUrl = await uploadImage(image); // Call the uploadImage function from Cloudinary logic
+        res.status(200).json({ imageUrl }); // Return the secure image URL in response
+    } catch (error) {
+        console.error("Error uploading image:", error); // Log the error details
+        res.status(500).json({ error: error.message }); // Handle errors
+    }
+});
 export default adminRouter;

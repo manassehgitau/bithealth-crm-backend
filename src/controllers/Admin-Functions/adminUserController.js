@@ -1,5 +1,6 @@
 import Customer from '../../models/customerModel.js';
 import Employee from '../../models/employeeModel.js';
+import Product from '../../models/productModel.js';
 import User from '../../models/userModel.js';
 
 // 🔹 Error Handler
@@ -12,17 +13,37 @@ export const getUserStatistics = async (req, res) => {
   try {
     // Count all users
     const totalUsers = await User.countDocuments();
-    
+    const userProfitMargin = -10.66;
+
     // Count employees
     const totalEmployees = await Employee.countDocuments();
-    
+    const employeeProfitMargin = 13.89;
+
     // Count regular users (role = user)
-    const totalCustomers = await Customer.countDocuments({ role: "user" });
+    const totalCustomers = await Customer.countDocuments();
+    const customerProfitMargin = 5.64;
+
+    // Count products
+    const totalProducts = await Product.countDocuments();
+    const productsProfitMargin = -1.23;
 
     res.status(200).json({
-      totalUsers,
-      totalEmployees,
-      totalCustomers,
+      totalUsers: {
+        count: totalUsers,
+        profitMargin: userProfitMargin,
+      },
+      totalEmployees: {
+        count: totalEmployees,
+        profitMargin: employeeProfitMargin,
+      },
+      totalCustomers: {
+        count: totalCustomers,
+        profitMargin: customerProfitMargin,
+      },
+      totalProducts: {
+        count: totalProducts,
+        profitMargin: productsProfitMargin,
+      },
     });
 
   } catch (err) {
@@ -33,17 +54,17 @@ export const getUserStatistics = async (req, res) => {
 // get all users
 export const getAllUsers = async (req, res) => {
 
-  try{
+  try {
     const users = await User.find();
     res.status(200).json(users);
   }
-  catch(err) {
+  catch (err) {
     handleError(res, err)
   }
 };
 
 // create new user
-export const createNewUser = async(req, res) => {
+export const createNewUser = async (req, res) => {
   const { username, email, password, role, phone, location, image } = req.body;
   if (!username || !email || !password) return res.status(400).json({ message: "All fields are required" });
 
@@ -63,14 +84,14 @@ export const createNewUser = async(req, res) => {
 
 // 🔹 Get user by ID
 export const getUserById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const user = await User.findById({_id: id});
-        if (!user) return res.status(404).json({ message: "User not found  or access denied" });
-        res.json(user);
-    } catch (err) {
-        handleError(res, err);
-    }
+  try {
+    const { id } = req.params;
+    const user = await User.findById({ _id: id });
+    if (!user) return res.status(404).json({ message: "User not found  or access denied" });
+    res.json(user);
+  } catch (err) {
+    handleError(res, err);
+  }
 };
 
 //  update User 
@@ -85,12 +106,12 @@ export const updateUser = async (req, res) => {
     const isValidUpdate = updateKeys.every(key => allowedUpdates.includes(key));
 
     if (!isValidUpdate) {
-        return res.status(400).json({ message: "Invalid update fields" });
+      return res.status(400).json({ message: "Invalid update fields" });
     }
 
     const updatedUser = await User.findByIdAndUpdate(id, updates, {
-        new: true,
-        runValidators: true
+      new: true,
+      runValidators: true
     });
 
     if (!updatedUser) return res.status(404).json({ message: "User not found" });
@@ -109,41 +130,41 @@ export const deleteUser = async (req, res) => {
     const deletedUser = await User.findByIdAndDelete(id);
 
     if (!deletedUser) return res.status(404).json({ message: "User not found" });
-    res.status(200).json({message: "User deleted successfully.", User: deletedUser});
-  
+    res.status(200).json({ message: "User deleted successfully.", User: deletedUser });
+
   } catch (error) {
-    
+
   }
 }
 
 // Activate a user account
 export const activateAccount = async (req, res) => {
   try {
-      const { id } = req.params;
+    const { id } = req.params;
 
-      // Find the user and update the status to active
-      const user = await User.findByIdAndUpdate({_id: id}, { status: "active" }, { new: true });
+    // Find the user and update the status to active
+    const user = await User.findByIdAndUpdate({ _id: id }, { status: "active" }, { new: true });
 
-      if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-      res.status(200).json({ message: "User account activated successfully", user });
+    res.status(200).json({ message: "User account activated successfully", user });
   } catch (error) {
-      handleError(res, error);
+    handleError(res, error);
   }
 };
 
 // Deactivate a user account
 export const deactivateAccount = async (req, res) => {
   try {
-      const { id } = req.params;
+    const { id } = req.params;
 
-      // Find the user and update the status to inactive
-      const user = await User.findByIdAndUpdate({_id: id}, { status: "inactive" }, { new: true },);
+    // Find the user and update the status to inactive
+    const user = await User.findByIdAndUpdate({ _id: id }, { status: "inactive" }, { new: true },);
 
-      if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-      res.status(200).json({ message: "User account deactivated successfully", user });
+    res.status(200).json({ message: "User account deactivated successfully", user });
   } catch (error) {
-      handleError(res, error);
+    handleError(res, error);
   }
 };

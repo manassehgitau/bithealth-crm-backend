@@ -13,16 +13,27 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "aws-sdk": "^2.1280.0",
+    "cloudinary": "^1.32.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.15.0",
-    "mongoose": "^8.12.2"
+    "mongoose": "^8.12.2",
+    "nodemailer": "^6.8.0"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.9",
     "nodemon": "^3.1.9"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manassehgitau/bithealth-crm-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/manassehgitau/bithealth-crm-backend/issues"
+  },
+  "homepage": "https://github.com/manassehgitau/bithealth-crm-backend#readme",
   "description": ""
 }
