@@ -1,5 +1,5 @@
 import express from "express";
-import { activateAccount, createNewUser, deactivateAccount, deleteUser, getAllUsers, getUserById, getUserStatistics, updateUser } from "../../controllers/Admin-Functions/adminUserController.js";
+import { activateAccount, createNewUser, createProfitMargins, deactivateAccount, deleteUser, getAllUsers, getProfitMarginsById, getUserById, getUserStatistics, updateProfitMargins, updateUser } from "../../controllers/Admin-Functions/adminUserController.js";
 import { getAllProducts, createNewProduct, updateProduct, deleteProduct, getProductById } from "../../controllers/Admin-Functions/adminProductController.js";
 import { verifyToken, authorizeRoles } from "../../middlewares/authMiddleware.js";
 import { assignDuty, assignSalesLeadToEmployee, createEmployee, createSalesLead, deleteEmployeeById, getAllEmployees, getEmployeeById, updateEmployee, viewEmployeeDuties, getAllSalesLeads, addActionToLead, getEmployeeLeads } from "../../controllers/Admin-Functions/adminEmployeeController.js";
@@ -12,22 +12,26 @@ const adminRouter = express.Router();
 // get all statistics
 adminRouter.get('/stats', verifyToken, getUserStatistics);
 
+// operations on profit margins
+adminRouter.post('/stats/margins', createProfitMargins);
+adminRouter.get('/stats/margins/:id', getProfitMarginsById);
+adminRouter.patch('/stats/margins/:id', updateProfitMargins);
 
 // Admin CRUD operations
-adminRouter.get('/users', getAllUsers);
-adminRouter.post('/users', createNewUser);
+adminRouter.get('/users', verifyToken, getAllUsers);
+adminRouter.post('/users', verifyToken, createNewUser);
 
-adminRouter.get('/users/:id', getUserById);
-adminRouter.patch('/users/:id', updateUser);
-adminRouter.delete('/users/:id', deleteUser);
+adminRouter.get('/users/:id', verifyToken, getUserById);
+adminRouter.patch('/users/:id', verifyToken, updateUser);
+adminRouter.delete('/users/:id', verifyToken, deleteUser);
 
 // admin customer functions
-adminRouter.post('/customers', createCustomer);
-adminRouter.get('/customers', getAllCustomers);
+adminRouter.post('/customers',verifyToken, createCustomer);
+adminRouter.get('/customers', verifyToken, getAllCustomers);
 
-adminRouter.get('/customers/:id', getCustomerById);
-adminRouter.patch('/customers/:id', updateCustomerById);
-adminRouter.delete('/customers/:id', deleteCustomerById);
+adminRouter.get('/customers/:id', verifyToken, getCustomerById);
+adminRouter.patch('/customers/:id', verifyToken, updateCustomerById);
+adminRouter.delete('/customers/:id', verifyToken, deleteCustomerById);
 // Activate account (only admins)
 adminRouter.patch('/customers/activate/:id', verifyToken, authorizeRoles("admin"), activateAccount);
 
@@ -45,6 +49,8 @@ adminRouter.delete('/products/:id', deleteProduct);
 
 // Admin employee functions 
 adminRouter.get('/employee', verifyToken, authorizeRoles("admin"), getAllEmployees);
+adminRouter.get('/employee/:id', verifyToken, authorizeRoles("admin"), getEmployeeById);
+
 adminRouter.post('/employee', verifyToken, authorizeRoles("admin"), createEmployee);
 
 adminRouter.patch('/employee/:id', verifyToken, authorizeRoles("admin"), updateEmployee);

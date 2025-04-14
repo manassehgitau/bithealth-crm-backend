@@ -1,31 +1,38 @@
 import Customer from '../../models/customerModel.js';
 import Employee from '../../models/employeeModel.js';
+import Margin from '../../models/marginStats.js';
 import Product from '../../models/productModel.js';
 import User from '../../models/userModel.js';
+//  import Admin from '../../models/adminModel.js';
 
 // 🔹 Error Handler
 const handleError = (res, error, status = 500) => {
   res.status(status).json({ message: error.message });
 };
 
+
 // get all stats for the users
 export const getUserStatistics = async (req, res) => {
   try {
-    // Count all users
-    const totalUsers = await User.countDocuments();
-    const userProfitMargin = -10.66;
+    const profitMargin = await fetch(process.env.PROFIT_MARGINS_URL);
+    const result = await profitMargin.json();
+    const userProfitMargin = result.userProfitMargin;
 
     // Count employees
     const totalEmployees = await Employee.countDocuments();
-    const employeeProfitMargin = 13.89;
+    const employeeProfitMargin = result.employeeProfitMargin;
 
     // Count regular users (role = user)
     const totalCustomers = await Customer.countDocuments();
-    const customerProfitMargin = 5.64;
+    const customerProfitMargin = result.customerProfitMargin;
 
     // Count products
     const totalProducts = await Product.countDocuments();
-    const productsProfitMargin = -1.23;
+    const productsProfitMargin = result.productsProfitMargin;
+
+    // Count all users
+    const totalAdmins = 0;
+    const totalUsers = totalEmployees + totalCustomers + totalAdmins;
 
     res.status(200).json({
       totalUsers: {
@@ -119,7 +126,7 @@ export const updateUser = async (req, res) => {
     res.json(updatedUser);
 
   } catch (err) {
-    handleError(res, err)
+    handleError(res, err);
   }
 };
 
@@ -137,6 +144,57 @@ export const deleteUser = async (req, res) => {
   }
 }
 
+export const createProfitMargins = async (req, res) => {
+  const {userProfitMargin, employeeProfitMargin, customerProfitMargin, productsProfitMargin} = req.body;
+  if (!userProfitMargin || !employeeProfitMargin || !customerProfitMargin || !productsProfitMargin) return res.status(400).json({ message: "All fields are required" });
+  try {
+    const margin = new Margin({userProfitMargin, employeeProfitMargin, customerProfitMargin, productsProfitMargin});
+    await margin.save();
+
+    res.json({message: "margins created successfully", margins: { id: margin._id, userProfitMargin: margin.userProfitMargin, employeeProfitMargin: margin.employeeProfitMargin, customerProfitMargin: margin.customerProfitMargin, productsProfitMargin: margin.productsProfitMargin}});
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+export const getProfitMarginsById = async(req, res) => {
+  try {
+    const { id } = req.params;
+    const margin = await Margin.findById({ _id: id });
+    if (!margin) return res.status(404).json({ message: "Margin not found  or access denied" });
+    res.json(margin)    
+  } catch (error) {
+    
+  }
+}
+
+export const updateProfitMargins = async(req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+     // Only allow updating specified fields
+     const allowedUpdates = ["userProfitMargin", "employeeProfitMargin", "customerProfitMargin", "productsProfitMargin"];
+     const updateKeys = Object.keys(updates);
+     const isValidUpdate = updateKeys.every(key => allowedUpdates.includes(key));
+ 
+     if (!isValidUpdate) {
+       return res.status(400).json({ message: "Invalid update fields" });
+     }
+
+     const updatedMargins = await Margin.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true
+    });
+
+    if (!updatedMargins) return res.status(404).json({ message: "Margins not found" });
+
+    res.json(updatedMargins);
+
+  } catch (error) {
+    handleError(res, err);
+  }
+}
 // Activate a user account
 export const activateAccount = async (req, res) => {
   try {
