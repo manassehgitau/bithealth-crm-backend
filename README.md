@@ -75,7 +75,13 @@ npm install
 
 3. **Set up environment variables**
 
-Create a `.env` file in the root directory with the following variables:
+Copy the `.env.example` file to `.env` and update with your actual values:
+
+```bash
+cp .env.example .env
+```
+
+Then edit the `.env` file with your configuration:
 
 ```env
 # Database
