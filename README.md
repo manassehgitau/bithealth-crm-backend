@@ -111,6 +111,8 @@ The server will start on `http://localhost:3000` (or your specified PORT).
 npm start
 ```
 
+**Note**: The `npm start` script in package.json currently references `node server` which may need to be updated to `node src/index.js` to match the actual entry point.
+
 ## 📁 Project Structure
 
 ```
@@ -214,25 +216,32 @@ bithealth-crm-backend/
 #### Employee Management
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|--------|
-| GET | `/employees` | Get all employees | Protected (Admin) |
-| POST | `/employees` | Create new employee | Protected (Admin) |
-| GET | `/employees/:id` | Get employee by ID | Protected (Admin) |
-| PATCH | `/employees/:id` | Update employee | Protected (Admin) |
-| DELETE | `/employees/:id` | Delete employee | Protected (Admin) |
-| POST | `/employees/:id/duties` | Assign duty to employee | Protected (Admin) |
-| GET | `/employees/:id/duties` | View employee duties | Protected (Admin) |
-| POST | `/employees/:id/leads` | Assign sales lead | Protected (Admin) |
-| GET | `/employees/:id/leads` | Get employee leads | Protected (Admin) |
+| GET | `/employee` | Get all employees | Protected (Admin) |
+| POST | `/employee` | Create new employee | Protected (Admin) |
+| GET | `/employee/:id` | Get employee by ID | Protected (Admin) |
+| PATCH | `/employee/:id` | Update employee | Protected (Admin) |
+| DELETE | `/employee/:id` | Delete employee | Protected (Admin) |
+| POST | `/employee/assignDuty` | Assign duty to employee | Protected (Admin) |
+| GET | `/employee/tasks/:id` | View employee duties | Protected (Admin) |
+| POST | `/employee/lead` | Create new sales lead | Protected (Admin) |
+| PUT | `/employee/assign-lead` | Assign sales lead to employee | Protected (Admin) |
+| GET | `/employee/leads/:employeeId` | Get employee leads | Protected (Admin) |
 
 #### Sales Leads & Analytics
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|--------|
-| GET | `/leads` | Get all sales leads | Protected (Admin) |
-| POST | `/leads` | Create new sales lead | Protected (Admin) |
-| POST | `/leads/:id/actions` | Add action to lead | Protected (Admin) |
+| GET | `/allLeads` | Get all sales leads | Protected (Admin) |
+| POST | `/employee/lead` | Create new sales lead | Protected (Admin) |
+| PUT | `/employee/add-action` | Add action to lead | Protected (Admin) |
+| PUT | `/employee/assign-lead` | Assign lead to employee | Protected (Admin) |
 | POST | `/stats/margins` | Create profit margins | Protected (Admin) |
 | GET | `/stats/margins/:id` | Get profit margins by ID | Protected (Admin) |
 | PATCH | `/stats/margins/:id` | Update profit margins | Protected (Admin) |
+
+#### Image Upload
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| POST | `/uploadImage` | Upload image to Cloudinary | Protected (Admin) |
 
 ## 🔑 Authentication
 
